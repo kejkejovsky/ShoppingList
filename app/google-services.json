@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "948862911873",
+    "firebase_url": "https://shoppinglist-ef47b-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "shoppinglist-ef47b",
+    "storage_bucket": "shoppinglist-ef47b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:948862911873:android:69d1aaebfafa0f0b481480",
+        "android_client_info": {
+          "package_name": "pl.wsb.students.android.introduction.shoppinglist"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "948862911873-76a6tin8tv7sqcnj3h842dt1ilkue6p7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDb0a1wrVAH2luIGJZ-qsEIOMTgSJQBFcs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "948862911873-76a6tin8tv7sqcnj3h842dt1ilkue6p7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
