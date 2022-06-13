@@ -1,13 +1,24 @@
 package pl.wsb.students.android.introduction.shoppinglist;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -17,21 +28,14 @@ import pl.wsb.students.android.introduction.shoppinglist.adapter.ItemsAdapter;
 import pl.wsb.students.android.introduction.shoppinglist.model.Item;
 
 public class MainActivity extends AppCompatActivity {
+    private List<Item> data = new ArrayList<Item>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Item item = new Item();
-        item.setId(1);
-        item.setName("Pyry");
-        item.setCategory("Warzywa");
-        List<Item> data = new ArrayList<Item>();
-        data.add(item);
-
-        testFirebase();
-        initRecyclerView(data);
+        getItemsApiCall();
     }
 
     private void initRecyclerView(List<Item> items) {
@@ -46,26 +50,59 @@ public class MainActivity extends AppCompatActivity {
         ItemsAdapter itemsAdapter = new ItemsAdapter(this, items);
         recyclerView.setAdapter(itemsAdapter);
 
-        for(Integer i = 0; i < itemsAdapter.getItemCount(); i++) {
-            Item test = itemsAdapter.getItem(i);
-            testFirebase(test, i.toString());
+    }
+
+    private void getItemsApiCall(){
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference myRef = database.getReference("ShoppingList/items");
+
+        myRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String previousChildName) {
+                Item item = dataSnapshot.getValue(Item.class);
+                data.add(item);
+                initRecyclerView(data);
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String previousChildName) {
+                Item item = dataSnapshot.getValue(Item.class);
+                String key = item.getId();
+                System.out.println("Changed item: " + key);
+                data.set(getIndexByProperty(data, key), item);
+                initRecyclerView(data);
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+                Item item = dataSnapshot.getValue(Item.class);
+                String key = item.getId();
+                System.out.println("Removed item: " + key);
+                data.remove(getIndexByProperty(data, key));
+                initRecyclerView(data);
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        initRecyclerView(data);
+    }
+
+    private int getIndexByProperty(List<Item> list, String id) {
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i) !=null && list.get(i).getId().equals(id)) {
+                return i;
+            }
         }
+        return -1;// not there is list
     }
 
-    private void testFirebase(){
-        // Write a message to the database
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("message3");
-
-        myRef.setValue("Test1");
-
-    }
-
-    private void testFirebase(Item item, String itemId){
-        // Write a message to the database
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("ShoppingList");
-
-        myRef.child("items").child(itemId).setValue(item);
-    }
 }
