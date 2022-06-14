@@ -25,24 +25,25 @@ import java.util.List;
 import java.util.Map;
 
 import pl.wsb.students.android.introduction.shoppinglist.R;
-import pl.wsb.students.android.introduction.shoppinglist.adapter.ItemsAdapter;
+import pl.wsb.students.android.introduction.shoppinglist.adapter.ShoppingListsAdapter;
 import pl.wsb.students.android.introduction.shoppinglist.model.Item;
+import pl.wsb.students.android.introduction.shoppinglist.model.ShoppingList;
 
-public class ItemsList extends Fragment {
-    private List<Item> data = new ArrayList<Item>();
-    private onAddItemElementListener onAddItemElementListener;
+public class ShoppingListsList extends Fragment {
+    private List<ShoppingList> data = new ArrayList<ShoppingList>();
+    private OnAddShoppingListElementListener onAddShoppingListElementListener;
     private String maxId;
 
-    public ItemsList(){
+    public ShoppingListsList(){
 
     }
-    public ItemsList(Item item){
-        addItemElement(item);
+    public ShoppingListsList(ShoppingList item){
+        onAddShoppingListElement(item);
     }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle
             savedInstanceState) {
-        View view = inflater.inflate(R.layout.items_list, parent, false);
+        View view = inflater.inflate(R.layout.shopping_lists_list, parent, false);
         data.clear();
         getItemsApiCall(view);
         return view;
@@ -51,7 +52,7 @@ public class ItemsList extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        FloatingActionButton btnAddItemElement = view.findViewById(R.id.btnAddItemElement);
+        FloatingActionButton btnAddItemElement = view.findViewById(R.id.btnAddShoppingListElement);
         if (btnAddItemElement != null) {
             btnAddItemElement.setOnClickListener(v -> {
                 handleBtnClick();
@@ -59,8 +60,8 @@ public class ItemsList extends Fragment {
         }
     }
 
-    private void initRecyclerView(View view, List<Item> items) {
-        RecyclerView recyclerView = view.findViewById(R.id.ItemsList);
+    private void initRecyclerView(View view, List<ShoppingList> items) {
+        RecyclerView recyclerView = view.findViewById(R.id.ShoppingLists);
         if (recyclerView == null) {
             return;
         } //if
@@ -68,18 +69,18 @@ public class ItemsList extends Fragment {
             return;
         } //if
         recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
-        ItemsAdapter itemsAdapter = new ItemsAdapter(view.getContext(), items);
-        recyclerView.setAdapter(itemsAdapter);
+        ShoppingListsAdapter shoppingListsAdapter = new ShoppingListsAdapter(view.getContext(), items);
+        recyclerView.setAdapter(shoppingListsAdapter);
     }
 
     private void getItemsApiCall(View view){
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("ShoppingList/items");
+        DatabaseReference myRef = database.getReference("ShoppingList/lists");
 
         myRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String previousChildName) {
-                Item item = dataSnapshot.getValue(Item.class);
+                ShoppingList item = dataSnapshot.getValue(ShoppingList.class);
                 data.add(item);
                 getMaxId();
                 initRecyclerView(view, data);
@@ -87,8 +88,8 @@ public class ItemsList extends Fragment {
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String previousChildName) {
-                Item item = dataSnapshot.getValue(Item.class);
-                String key = item.getId();
+                ShoppingList item = dataSnapshot.getValue(ShoppingList.class);
+                String key = item.getName();
                 System.out.println("Changed item: " + key);
                 data.set(getIndexByProperty(data, key), item);
                 getMaxId();
@@ -97,9 +98,8 @@ public class ItemsList extends Fragment {
 
             @Override
             public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-                Item item = dataSnapshot.getValue(Item.class);
+                ShoppingList item = dataSnapshot.getValue(ShoppingList.class);
                 String key = item.getId();
-                System.out.println("Removed item: " + key);
                 data.remove(getIndexByProperty(data, key));
                 getMaxId();
                 initRecyclerView(view, data);
@@ -120,9 +120,9 @@ public class ItemsList extends Fragment {
         initRecyclerView(view, data);
     }
 
-    private int getIndexByProperty(List<Item> list, String id) {
+    private int getIndexByProperty(List<ShoppingList> list, String id) {
         for (int i = 0; i < list.size(); i++) {
-            if (list.get(i) !=null && list.get(i).getId().equals(id)) {
+            if (list.get(i) !=null && list.get(i).getName().equals(id)) {
                 return i;
             }
         }
@@ -131,33 +131,33 @@ public class ItemsList extends Fragment {
 
     private void handleBtnClick() {
         System.out.println("Click");
-        if (onAddItemElementListener != null) {
-            onAddItemElementListener.onAddItemElement(maxId);
+        if (onAddShoppingListElementListener != null) {
+            onAddShoppingListElementListener.onAddShoppingListElement(maxId);
         }
     }
 
-    public void setOnAddItemElementListener(onAddItemElementListener
-                                                     onAddItemElementListener) {
-        this.onAddItemElementListener = onAddItemElementListener;
+    public void setOnAddShoppingListElementListener(OnAddShoppingListElementListener
+                                                            onAddShoppingListElementListener) {
+        this.onAddShoppingListElementListener = onAddShoppingListElementListener;
     }
 
-    public interface onAddItemElementListener {
-        void onAddItemElement(String id);
+    public interface OnAddShoppingListElementListener {
+        void onAddShoppingListElement(String id);
     }
 
-    private void addItemElement(Item item){
+    private void onAddShoppingListElement(ShoppingList item){
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference mDatabaseRef = database.getReference("ShoppingList");
 
         Map<String, Object> itemValues = item.toMap();
         Map<String, Object> childUpdates = new HashMap<>();
-        childUpdates.put("/items/" + item.getId(), itemValues);
+        childUpdates.put("/lists/" + item.getId(), itemValues);
         mDatabaseRef.updateChildren(childUpdates);
     }
 
     private void getMaxId(){
         Integer max = 0;
-        for(Item el: data){
+        for(ShoppingList el: data){
             if(Integer.parseInt(el.getId()) > max){
                 max = Integer.parseInt(el.getId());
             }

@@ -7,4 +7,6 @@
     <string name="item__no_name">Proszę podać nazwę produktu</string>
     <string name="item__no_category">Proszę podać kategorie</string>
     <string name="screen_title">Lista</string>
+    <string name="dodaj_liste">Dodaj listę</string>
+    <string name="shopping_list__no_name">Proszę podać nazwę listy</string>
 </resources>

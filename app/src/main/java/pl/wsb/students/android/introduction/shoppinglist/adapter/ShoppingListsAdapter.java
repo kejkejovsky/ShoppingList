@@ -1,7 +1,6 @@
 package pl.wsb.students.android.introduction.shoppinglist.adapter;
 
 import android.content.Context;
-import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,16 +19,16 @@ import java.util.List;
 import java.util.Map;
 
 import pl.wsb.students.android.introduction.shoppinglist.R;
-import pl.wsb.students.android.introduction.shoppinglist.model.Item;
+import pl.wsb.students.android.introduction.shoppinglist.model.ShoppingList;
 
-public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> {
-    private final List<Item> data;
+public class ShoppingListsAdapter extends RecyclerView.Adapter<ShoppingListsAdapter.ViewHolder> {
+    private final List<ShoppingList> data;
     private final LayoutInflater inflater;
     private DatabaseReference mDatabaseRef;
 
-    public ItemsAdapter(
+    public ShoppingListsAdapter(
             Context context,
-            List<Item> data
+            List<ShoppingList> data
     ) {
         this.inflater = LayoutInflater.from(context);
         this.data = data;
@@ -47,49 +46,19 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
     }
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Item item = data.get(position);
-        if (item == null) {
+        ShoppingList shoppingList = data.get(position);
+        if (shoppingList == null) {
             return;
         } //if
 
-        holder.txtItemName.setText(item.getName());
-        holder.txtItemCategory.setText(item.getCategory());
+        holder.txtItemName.setText(shoppingList.getName());
+        holder.txtItemCategory.setText(shoppingList.getCreateDate());
 
-        if(item.getDone() == 1){
-            holder.cardItem.setBackgroundColor(0xC0C0C0FF);
-            holder.buttonRemoveItem.setVisibility(View.INVISIBLE);
-            holder.txtItemName.setPaintFlags(holder.txtItemName.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-        }else{
-            holder.cardItem.setBackgroundColor(0xFFFFFFFF);
-            holder.buttonRemoveItem.setVisibility(View.VISIBLE);
-            holder.txtItemName.setPaintFlags(holder.txtItemName.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
-        }
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(item.getDone() == 0){
-                    item.setDone(1);
-                    holder.cardItem.setBackgroundColor(0xC0C0C0FF);
-                    holder.buttonRemoveItem.setVisibility(View.INVISIBLE);
-                    holder.txtItemName.setPaintFlags(holder.txtItemName.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-                }else{
-                    item.setDone(0);
-                    holder.cardItem.setBackgroundColor(0xFFFFFFFF);
-                    holder.buttonRemoveItem.setVisibility(View.VISIBLE);
-                    holder.txtItemName.setPaintFlags(holder.txtItemName.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
-                }
-
-                Map<String, Object> itemValues = item.toMap();
-                Map<String, Object> childUpdates = new HashMap<>();
-                childUpdates.put("/items/" + item.getId(), itemValues);
-                mDatabaseRef.updateChildren(childUpdates);
-            }
-        });
-        holder.itemView.findViewById(R.id.buttonRemoveItem).setOnClickListener(new View.OnClickListener() {
+        holder.buttonRemoveItem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Map<String, Object> childUpdates = new HashMap<>();
-                childUpdates.put("/items/" + item.getId(), null);
+                childUpdates.put("/lists/" + shoppingList.getName(), null);
                 mDatabaseRef.updateChildren(childUpdates);
             }
         });
@@ -116,7 +85,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
                     itemView.findViewById(R.id.cardItem);
         }
     }
-    public Item getItem(int position) {
+    public ShoppingList getShoppingList(int position) {
         return data.get(position);
     }
 }

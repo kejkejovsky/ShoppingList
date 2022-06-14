@@ -61,7 +61,6 @@
                 android:layout_marginStart="@dimen/default_margin"
                 android:layout_marginEnd="@dimen/default_margin"
                 android:background="@drawable/rounded_button"
-                android:clickable="true"
                 android:text="@string/btnRemoveItem"
                 android:textColor="#ffffff"
                 app:layout_constraintBottom_toBottomOf="parent"

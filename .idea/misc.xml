@@ -6,8 +6,10 @@
         <entry key="..\:/Users/kksek/Documents/WSB/SEM3/SUM/master/ShoppingList/app/src/main/res/drawable/rounded_button.xml" value="0.1" />
         <entry key="..\:/Users/kksek/Documents/WSB/SEM3/SUM/master/ShoppingList/app/src/main/res/layout/activity_main.xml" value="0.2" />
         <entry key="..\:/Users/kksek/Documents/WSB/SEM3/SUM/master/ShoppingList/app/src/main/res/layout/add_item.xml" value="0.2115036231884058" />
-        <entry key="..\:/Users/kksek/Documents/WSB/SEM3/SUM/master/ShoppingList/app/src/main/res/layout/item_shopping_list.xml" value="0.1" />
+        <entry key="..\:/Users/kksek/Documents/WSB/SEM3/SUM/master/ShoppingList/app/src/main/res/layout/add_shopping_list.xml" value="0.2076923076923077" />
+        <entry key="..\:/Users/kksek/Documents/WSB/SEM3/SUM/master/ShoppingList/app/src/main/res/layout/item_shopping_list.xml" value="0.4" />
         <entry key="..\:/Users/kksek/Documents/WSB/SEM3/SUM/master/ShoppingList/app/src/main/res/layout/items_list.xml" value="0.15949453551912568" />
+        <entry key="..\:/Users/kksek/Documents/WSB/SEM3/SUM/master/ShoppingList/app/src/main/res/layout/shopping_lists_list.xml" value="0.2115036231884058" />
       </map>
     </option>
   </component>
