@@ -1,4 +1,10 @@
 <resources>
     <string name="app_name">Shopping List</string>
     <string name="btnRemoveItem">-</string>
+    <string name="dodaj_przedmiot">Dodaj przedmiot</string>
+    <string name="kategoria">Kategoria</string>
+    <string name="nazwa">Nazwa</string>
+    <string name="item__no_name">Proszę podać nazwę produktu</string>
+    <string name="item__no_category">Proszę podać kategorie</string>
+    <string name="screen_title">Lista</string>
 </resources>

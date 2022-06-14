@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -18,7 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import pl.wsb.students.android.introduction.shoppinglist.MainActivity;
 import pl.wsb.students.android.introduction.shoppinglist.R;
 import pl.wsb.students.android.introduction.shoppinglist.model.Item;
 
@@ -53,6 +51,8 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
         } //if
 
         holder.txtItemName.setText(item.getName());
+        holder.txtItemName.setText(item.getCategory());
+
         if(item.getDone() == 1){
             holder.itemView.findViewById(R.id.cardItem).setBackgroundColor(0xC0C0C0FF);
             holder.itemView.findViewById(R.id.buttonRemoveItem).setVisibility(View.INVISIBLE);

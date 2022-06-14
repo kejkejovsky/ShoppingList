@@ -3,6 +3,9 @@ package pl.wsb.students.android.introduction.shoppinglist;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -25,84 +28,43 @@ import java.util.ArrayList;
 import java.util.List;
 
 import pl.wsb.students.android.introduction.shoppinglist.adapter.ItemsAdapter;
+import pl.wsb.students.android.introduction.shoppinglist.fragments.AddItem;
+import pl.wsb.students.android.introduction.shoppinglist.fragments.ItemsList;
 import pl.wsb.students.android.introduction.shoppinglist.model.Item;
 
-public class MainActivity extends AppCompatActivity {
-    private List<Item> data = new ArrayList<Item>();
+public class MainActivity extends AppCompatActivity implements AddItem.onAddItemListener, ItemsList.onAddItemElementListener {
 
+    private void replaceFragment(Fragment fragment, int containerResId) {
+        if (fragment == null) {
+            return;
+        } //if
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(containerResId, fragment);
+        fragmentTransaction.addToBackStack(fragment.toString());
+        fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        fragmentTransaction.commit();
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        getItemsApiCall();
+        ItemsList itemsList = new ItemsList();
+        itemsList.setOnAddItemElementListener(this);
+        replaceFragment(itemsList, R.id.fragmentContainer);
     }
 
-    private void initRecyclerView(List<Item> items) {
-        RecyclerView recyclerView = findViewById(R.id.ItemsList);
-        if (recyclerView == null) {
-            return;
-        } //if
-        if (items == null) {
-            return;
-        } //if
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        ItemsAdapter itemsAdapter = new ItemsAdapter(this, items);
-        recyclerView.setAdapter(itemsAdapter);
-
+    @Override
+    public void onAddItem(Item item) {
+        ItemsList itemsList = new ItemsList(item);
+        itemsList.setOnAddItemElementListener(this);
+        replaceFragment(itemsList, R.id.fragmentContainer);
     }
 
-    private void getItemsApiCall(){
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("ShoppingList/items");
-
-        myRef.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String previousChildName) {
-                Item item = dataSnapshot.getValue(Item.class);
-                data.add(item);
-                initRecyclerView(data);
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String previousChildName) {
-                Item item = dataSnapshot.getValue(Item.class);
-                String key = item.getId();
-                System.out.println("Changed item: " + key);
-                data.set(getIndexByProperty(data, key), item);
-                initRecyclerView(data);
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-                Item item = dataSnapshot.getValue(Item.class);
-                String key = item.getId();
-                System.out.println("Removed item: " + key);
-                data.remove(getIndexByProperty(data, key));
-                initRecyclerView(data);
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
-        initRecyclerView(data);
+    @Override
+    public void onAddItemElement(String id) {
+        AddItem addItem = new AddItem(id);
+        addItem.setOnAddItemListener(this);
+        replaceFragment(addItem, R.id.fragmentContainer);
     }
-
-    private int getIndexByProperty(List<Item> list, String id) {
-        for (int i = 0; i < list.size(); i++) {
-            if (list.get(i) !=null && list.get(i).getId().equals(id)) {
-                return i;
-            }
-        }
-        return -1;// not there is list
-    }
-
 }
