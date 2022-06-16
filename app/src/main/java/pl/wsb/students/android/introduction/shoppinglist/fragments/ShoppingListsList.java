@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,6 +21,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,23 +32,30 @@ import pl.wsb.students.android.introduction.shoppinglist.adapter.ShoppingListsAd
 import pl.wsb.students.android.introduction.shoppinglist.model.Item;
 import pl.wsb.students.android.introduction.shoppinglist.model.ShoppingList;
 
-public class ShoppingListsList extends Fragment {
+public class ShoppingListsList extends Fragment{
     private List<ShoppingList> data = new ArrayList<ShoppingList>();
     private OnAddShoppingListElementListener onAddShoppingListElementListener;
+    private ShoppingListsAdapter.onListClickListener onListClickListener;
     private String maxId;
+    private DatabaseReference myRef;
+    private ChildEventListener childEventListener;
+    private int times = 0;
 
     public ShoppingListsList(){
 
     }
-    public ShoppingListsList(ShoppingList item){
-        onAddShoppingListElement(item);
-    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle
             savedInstanceState) {
         View view = inflater.inflate(R.layout.shopping_lists_list, parent, false);
+        ((TextView) view.findViewById(R.id.txtScreenTitle)).setText("Listy zakupów");
+
         data.clear();
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        this.myRef = database.getReference("ShoppingList/lists");
         getItemsApiCall(view);
+
         return view;
     }
 
@@ -58,6 +68,7 @@ public class ShoppingListsList extends Fragment {
                 handleBtnClick();
             });
         }
+
     }
 
     private void initRecyclerView(View view, List<ShoppingList> items) {
@@ -70,18 +81,20 @@ public class ShoppingListsList extends Fragment {
         } //if
         recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
         ShoppingListsAdapter shoppingListsAdapter = new ShoppingListsAdapter(view.getContext(), items);
+        shoppingListsAdapter.setOnListClickListener(onListClickListener);
         recyclerView.setAdapter(shoppingListsAdapter);
     }
 
     private void getItemsApiCall(View view){
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("ShoppingList/lists");
-
-        myRef.addChildEventListener(new ChildEventListener() {
+        childEventListener = myRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String previousChildName) {
                 ShoppingList item = dataSnapshot.getValue(ShoppingList.class);
-                data.add(item);
+                if(getIndexByProperty(data, item.getId()) == -1) {
+                    System.out.println("onChildAdded, itemId = " + item.getId() + " times = " + times);
+                    data.add(item);
+                    sortData();
+                }
                 getMaxId();
                 initRecyclerView(view, data);
             }
@@ -90,8 +103,11 @@ public class ShoppingListsList extends Fragment {
             public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String previousChildName) {
                 ShoppingList item = dataSnapshot.getValue(ShoppingList.class);
                 String key = item.getName();
-                System.out.println("Changed item: " + key);
-                data.set(getIndexByProperty(data, key), item);
+                if(getIndexByProperty(data, key) != -1) {
+                    System.out.println("onChildChanged, itemId = " + item.getId() + " times = " + times);
+                    data.set(getIndexByProperty(data, key), item);
+                    sortData();
+                }
                 getMaxId();
                 initRecyclerView(view, data);
             }
@@ -99,8 +115,12 @@ public class ShoppingListsList extends Fragment {
             @Override
             public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
                 ShoppingList item = dataSnapshot.getValue(ShoppingList.class);
-                String key = item.getId();
-                data.remove(getIndexByProperty(data, key));
+                String key = item.getName();
+                if(getIndexByProperty(data, key) != -1) {
+                    System.out.println("onChildRemoved, itemId = " + item.getId() + " times = " + times);
+                    data.remove(getIndexByProperty(data, key));
+                    sortData();
+                }
                 getMaxId();
                 initRecyclerView(view, data);
             }
@@ -130,9 +150,9 @@ public class ShoppingListsList extends Fragment {
     }
 
     private void handleBtnClick() {
-        System.out.println("Click");
         if (onAddShoppingListElementListener != null) {
-            onAddShoppingListElementListener.onAddShoppingListElement(maxId);
+            myRef.removeEventListener(childEventListener);
+            onAddShoppingListElementListener.onAddShoppingListElement(maxId, data);
         }
     }
 
@@ -141,18 +161,12 @@ public class ShoppingListsList extends Fragment {
         this.onAddShoppingListElementListener = onAddShoppingListElementListener;
     }
 
-    public interface OnAddShoppingListElementListener {
-        void onAddShoppingListElement(String id);
+    public void setOnListClickListener(ShoppingListsAdapter.onListClickListener onListClickListener) {
+        this.onListClickListener = onListClickListener;
     }
 
-    private void onAddShoppingListElement(ShoppingList item){
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference mDatabaseRef = database.getReference("ShoppingList");
-
-        Map<String, Object> itemValues = item.toMap();
-        Map<String, Object> childUpdates = new HashMap<>();
-        childUpdates.put("/lists/" + item.getId(), itemValues);
-        mDatabaseRef.updateChildren(childUpdates);
+    public interface OnAddShoppingListElementListener {
+        void onAddShoppingListElement(String id, List<ShoppingList> data);
     }
 
     private void getMaxId(){
@@ -163,5 +177,13 @@ public class ShoppingListsList extends Fragment {
             }
         }
         this.maxId = max.toString();
+    }
+    private void sortData(){
+        Collections.sort(data, new Comparator<ShoppingList>() {
+            @Override
+            public int compare(ShoppingList o1, ShoppingList o2) {
+                return Integer.parseInt(o1.getId()) > Integer.parseInt(o2.getId()) ? 1 : -1;
+            }
+        });
     }
 }

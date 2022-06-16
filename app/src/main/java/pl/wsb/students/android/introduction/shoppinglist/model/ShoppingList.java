@@ -43,6 +43,13 @@ public class ShoppingList {
         this.id = id;
     }
 
+    @Override
+    public String toString() {
+        return "ShoppingList{" +
+                "id='" + id + '\'' +
+                '}';
+    }
+
     public ShoppingList(){
 
     }

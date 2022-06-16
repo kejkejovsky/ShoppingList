@@ -25,19 +25,19 @@
         app:layout_constraintTop_toTopOf="parent"
         android:importantForAutofill="no" />
 
-    <EditText
+
+    <Spinner
         android:id="@+id/editTextCategory"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="textPersonName"
-        android:minHeight="48dp"
+        android:background="@android:drawable/btn_dropdown"
+        android:spinnerMode="dropdown"
         android:hint="@string/kategoria"
+        android:contentDescription="@string/kategoria"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextName"
-        android:importantForAutofill="no" />
+        app:layout_constraintTop_toBottomOf="@+id/editTextName"/>
 
     <Button
         android:id="@+id/btnAddItem"

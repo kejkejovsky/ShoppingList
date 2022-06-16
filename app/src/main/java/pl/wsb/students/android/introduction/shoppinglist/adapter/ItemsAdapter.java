@@ -12,6 +12,9 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -21,20 +24,29 @@ import java.util.Map;
 
 import pl.wsb.students.android.introduction.shoppinglist.R;
 import pl.wsb.students.android.introduction.shoppinglist.model.Item;
+import pl.wsb.students.android.introduction.shoppinglist.model.ShoppingList;
 
 public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> {
     private final List<Item> data;
     private final LayoutInflater inflater;
     private DatabaseReference mDatabaseRef;
+    private String listId;
+    private ShoppingList shoppingList;
 
     public ItemsAdapter(
             Context context,
-            List<Item> data
+            List<Item> data,
+            String listId
     ) {
         this.inflater = LayoutInflater.from(context);
         this.data = data;
+        this.listId = listId;
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         mDatabaseRef = database.getReference("ShoppingList");
+    }
+
+    public void setShoppingList(ShoppingList shoppingList){
+        this.shoppingList = shoppingList;
     }
 
     @NonNull
@@ -54,6 +66,9 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
 
         holder.txtItemName.setText(item.getName());
         holder.txtItemCategory.setText(item.getCategory());
+        if(shoppingList != null && holder.txtScreenTitle != null) {
+            holder.txtScreenTitle.setText(shoppingList.getName());
+        }
 
         if(item.getDone() == 1){
             holder.cardItem.setBackgroundColor(0xC0C0C0FF);
@@ -81,7 +96,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
 
                 Map<String, Object> itemValues = item.toMap();
                 Map<String, Object> childUpdates = new HashMap<>();
-                childUpdates.put("/items/" + item.getId(), itemValues);
+                childUpdates.put("/lists/" + listId + "/items/" + item.getId(), itemValues);
                 mDatabaseRef.updateChildren(childUpdates);
             }
         });
@@ -89,7 +104,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
             @Override
             public void onClick(View v) {
                 Map<String, Object> childUpdates = new HashMap<>();
-                childUpdates.put("/items/" + item.getId(), null);
+                childUpdates.put("/lists/" + listId + "/items/" + item.getId(), null);
                 mDatabaseRef.updateChildren(childUpdates);
             }
         });
@@ -101,6 +116,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView txtItemName;
         TextView txtItemCategory;
+        TextView txtScreenTitle;
         Button buttonRemoveItem;
         CardView cardItem;
 
@@ -114,9 +130,13 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
                     itemView.findViewById(R.id.buttonRemoveItem);
             this.cardItem =
                     itemView.findViewById(R.id.cardItem);
+            this.txtScreenTitle =
+                    itemView.findViewById(R.id.txtScreenTitle);
         }
     }
     public Item getItem(int position) {
         return data.get(position);
     }
+
+
 }
